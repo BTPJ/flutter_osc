@@ -1,9 +1,10 @@
 .DS_Store
 .dart_tool/
-
+*.iml
 .packages
 .pub/
-
+/.idea/workspace.xml
+/.idea/libraries
 build/
 
 .flutter-plugins
