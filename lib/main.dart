@@ -20,7 +20,14 @@ class MyApp extends StatelessWidget {
         // counter didn't reset back to zero; the application is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'Flutter Demo Home Page'),
+      home: new Scaffold(
+        appBar: new AppBar(
+          title: new Text("我是标题"),
+        ),
+        body: new Center(
+          child: new Text("我是一个居中的文本"),
+        ),
+      ),
     );
   }
 }
