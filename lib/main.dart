@@ -1,117 +1,145 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_osc/pages/DiscoveryPage.dart';
+import 'package:flutter_osc/pages/MyInfoPage.dart';
+import 'package:flutter_osc/pages/NewsListPage.dart';
+import 'package:flutter_osc/pages/TweetsListPage.dart';
+import 'package:flutter/cupertino.dart';
 
 void main() => runApp(new MyApp());
 
-/// 测试
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+/// 主界面
+class MyApp extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return new MyOSCClientState();
+  }
+}
+
+class MyOSCClientState extends State<MyApp> {
+  /// 页面当前选中的Tab的索引
+  int currentTabIndex = 0;
+
+  /// 页面底部TabItem上的图标数组
+  var tabImages;
+
+  /// 页面顶部的大标题（也是TabItem上的文本）
+  var appBarTitles = ['资讯', '动弹', '发现', '我的'];
+
+  /// tab未选中字体的样式
+  final tabTextStyleNormal = new TextStyle(color: const Color(0xff969696));
+
+  /// tab选中后字体的样式
+  final tabTextStyleSelected = new TextStyle(color: const Color(0xff63ca6c));
+
+  var body;
+
   @override
   Widget build(BuildContext context) {
+    // TODO: implement build
+    initData(); // 初始化各种数据，包括TabIcon数据和页面内容数据
     return new MaterialApp(
-      title: 'Flutter Demo',
       theme: new ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or press Run > Flutter Hot Reload in IntelliJ). Notice that the
-        // counter didn't reset back to zero; the application is not restarted.
-        primarySwatch: Colors.blue,
-      ),
+          // 设置主题色
+          primaryColor: const Color(0xFF63CA6C)),
       home: new Scaffold(
         appBar: new AppBar(
-          title: new Text("我是标题"),
+          title: new Text("My OSC", style: new TextStyle(color: Colors.white)),
+          iconTheme: new IconThemeData(color: Colors.white),
         ),
-        body: new Center(
-          child: new Text("我是一个居中的文本"),
+        body: body,
+
+        // bottomNavigationBar属性为页面底部添加导航的Tab，CupertinoTabBar是Flutter提供的一个iOS风格的底部导航栏组件
+        bottomNavigationBar: new CupertinoTabBar(
+          items: getBottomNavItems(),
+          onTap: (index) {
+            setState(() {
+              currentTabIndex = index;
+            });
+          },
+        ),
+
+        //  drawer属性用于为当前页面添加一个侧滑菜单
+        drawer: new Drawer(
+          child: new Center(
+            child: new Text("我是侧滑菜单"),
+          ),
         ),
       ),
     );
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  /// 数据初始化，包括TabIcon数据和页面内容数据
+  void initData() {
+    if (tabImages == null) {
+      tabImages = [
+        [
+          getTabImage('images/ic_nav_news_normal.png'),
+          getTabImage('images/ic_nav_news_actived.png')
+        ],
+        [
+          getTabImage('images/ic_nav_tweet_normal.png'),
+          getTabImage('images/ic_nav_tweet_actived.png')
+        ],
+        [
+          getTabImage('images/ic_nav_discover_normal.png'),
+          getTabImage('images/ic_nav_discover_actived.png')
+        ],
+        [
+          getTabImage('images/ic_nav_my_normal.png'),
+          getTabImage('images/ic_nav_my_pressed.png')
+        ]
+      ];
+    }
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => new _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+    /// 页面body部分组件
+    body = new IndexedStack(
+      children: <Widget>[
+        new NewsListPage(),
+        new TweetsListPage(),
+        new DiscoveryPage(),
+        new MyInfoPage()
+      ],
+      index: currentTabIndex,
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return new Scaffold(
-      appBar: new AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: new Text(widget.title),
-      ),
-      body: new Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: new Column(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug paint" (press "p" in the console where you ran
-          // "flutter run", or select "Toggle Debug Paint" from the Flutter tool
-          // window in IntelliJ) to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new Text(
-              'You have pushed the button this many times:',
-            ),
-            new Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: new Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+  /// 传入图片路径，返回一个Image组件
+  Image getTabImage(path) {
+    return new Image.asset(path, width: 20.0, height: 20.0);
+  }
+
+  /// 获得底部Tab对应的Item
+  List<BottomNavigationBarItem> getBottomNavItems() {
+    List<BottomNavigationBarItem> list = new List();
+    for (int i = 0; i < 4; i++) {
+      list.add(new BottomNavigationBarItem(
+          icon: getTabIcon(i), title: getTabTitle(i)));
+    }
+    return list;
+  }
+
+  /// 根据当前的tabIndex获取Tab显示的图标
+  Image getTabIcon(int tabIndex) {
+    if (tabIndex == currentTabIndex) {
+      return tabImages[currentTabIndex][1];
+    }
+    return tabImages[tabIndex][0];
+  }
+
+  /// 根据当前的tabIndex获取Tab显示的标题
+  Text getTabTitle(int tabIndex) {
+    return new Text(
+      appBarTitles[tabIndex],
+      style: getTabTextStyle(tabIndex),
     );
+  }
+
+  /// 根据当前的tabIndex获取Tab字体的样式
+  TextStyle getTabTextStyle(int tabIndex) {
+    if (tabIndex == currentTabIndex) {
+      return tabTextStyleSelected;
+    }
+    return tabTextStyleNormal;
   }
 }
