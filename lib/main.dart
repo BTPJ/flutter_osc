@@ -4,6 +4,7 @@ import 'package:flutter_osc/pages/MyInfoPage.dart';
 import 'package:flutter_osc/pages/NewsListPage.dart';
 import 'package:flutter_osc/pages/TweetsListPage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_osc/widgets/MyDrawer.dart';
 
 void main() => runApp(new MyApp());
 
@@ -60,11 +61,7 @@ class MyOSCClientState extends State<MyApp> {
         ),
 
         //  drawer属性用于为当前页面添加一个侧滑菜单
-        drawer: new Drawer(
-          child: new Center(
-            child: new Text("我是侧滑菜单"),
-          ),
-        ),
+        drawer: new MyDrawer(),
       ),
     );
   }
