@@ -3,8 +3,7 @@
 *.iml
 .packages
 .pub/
-/.idea/workspace.xml
-/.idea/libraries
+.idea/
 build/
 
 .flutter-plugins
