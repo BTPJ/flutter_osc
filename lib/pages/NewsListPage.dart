@@ -1,51 +1,123 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_osc/base/Constants.dart';
+import 'package:flutter_osc/http/Api.dart';
+import 'package:flutter_osc/http/NetUtil.dart';
+import 'package:flutter_osc/widgets/CommonEndLine.dart';
 import 'package:flutter_osc/widgets/SlideView.dart';
 
 /// 资讯列表Tab界面
 // ignore: must_be_immutable
-class NewsListPage extends StatelessWidget {
+class NewsListPage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return new NewsListPageState();
+  }
+}
+
+class NewsListPageState extends State<NewsListPage> {
   /// 轮播图的数据
-  var slideData = [];
+  var mSlideData;
 
   /// 列表的数据（轮播图数据和列表数据分开，但是实际上轮播图和列表中的item同属于ListView的item）
-  var listData = [];
+  var mListData;
 
-  NewsListPage() {
-    // 测试轮播图数据
-    for (var i = 0; i < 3; i++) {
-      Map map = new Map();
-      map['title'] = 'Python 之父透露退位隐情，与核心开发团队产生隔阂';
-      map['detailUrl'] =
-          'https://www.oschina.net/news/98455/guido-van-rossum-resigns';
-      map['imgUrl'] =
-          'https://static.oschina.net/uploads/img/201807/30113144_1SRR.png';
-      slideData.add(map);
-    }
+  /// 监听listView的滚动事件
+  ScrollController mController = new ScrollController();
 
-    // 测试列表数据
-    for (var j = 0; j < 30; j++) {
-      Map map = new Map();
-      map['title'] = 'J2Cache 2.3.23 发布，支持 memcached 二级缓存';
-      // 列表item的作者头像URL
-      map['authorImg'] =
-          'https://static.oschina.net/uploads/user/0/12_50.jpg?t=1421200584000';
-      // 列表item的时间文本
-      map['timeStr'] = '2018-7-30';
-      // 列表item的资讯图片
-      map['thumb'] =
-          'https://static.oschina.net/uploads/logo/j2cache_N3NcX.png';
-      // 列表item的评论数
-      map['commCount'] = j;
-      listData.add(map);
-    }
+  /// 当前页
+  var mCurrentPage = 1;
+
+  /// 列表数量
+  var mListTotalSize = 0;
+
+  /// 构造器
+  NewsListPageState() {
+    mController.addListener(() {
+      // 表示列表的最大滚动距离
+      var maxScroll = mController.position.maxScrollExtent;
+      // 表示当前列表已向下滚动的距离
+      var pixels = mController.position.pixels;
+      // 如果两个值相等，表示滚动到底，并且如果列表没有加载完所有数据
+      if (maxScroll == pixels && mListData.length < mListTotalSize) {
+        mCurrentPage++; // 当前页索引加1
+        getNewsList(true); // 获取下一页数据
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getNewsList(false);
   }
 
   @override
   Widget build(BuildContext context) {
-    return new ListView.builder(
-      itemBuilder: (context, index) => renderRow(index),
-      itemCount: listData.length * 2 + 1,
-    );
+    // 无数据时显示Loading
+    if (mListData == null) {
+      return new Center(
+        // CircularProgressIndicator是一个圆形的Loading进度条
+        child: new CircularProgressIndicator(),
+      );
+    } else {
+      Widget listView = new ListView.builder(
+        itemBuilder: (context, index) => renderRow(index),
+        itemCount: mListData.length * 2,
+        controller: mController, // 监听列表滚动事件
+      );
+      return new RefreshIndicator(child: listView, onRefresh: pullToRefresh);
+    }
+  }
+
+  Future<Null> pullToRefresh() async {
+    //TODO 下拉刷新
+    mCurrentPage = 1;
+    getNewsList(false);
+    return null;
+  }
+
+  /// 网络获取资讯列表
+  void getNewsList(bool isLoadMore) {
+    String url = Api.NEWS_LIST;
+    // currentPage是定义在NewsListPageState中的成员变量，表示当前加载的页面索引
+    url += "?pageIndex=$mCurrentPage&pageSize=10";
+    NetUtil.get(url).then((data) {
+      if (data != null) {
+        // 将接口返回的json字符串解析为map类型，需要导入包：import 'dart:convert';
+        Map<String, dynamic> map = json.decode(data);
+        if (map['code'] == 0) {
+          // code=0表示请求成功
+          var msg = map['msg'];
+          // total表示资讯总条数
+          mListTotalSize = msg['news']['total'];
+          // data为数据内容，其中包含slide和news两部分，分别表示头部轮播图数据，和下面的列表数据
+          var listData = msg['news']['data'];
+          var slideData = msg['slide'];
+          setState(() {
+            if (!isLoadMore) {
+              // 不是加载更多，则直接为变量赋值
+              mListData = listData;
+            } else {
+              // 是加载更多，则需要将取到的news数据追加到原来的数据后面
+              List list = new List();
+              list.addAll(mListData);
+              list.addAll(listData);
+              // 判断是否获取了所有的数据，如果是，则需要显示底部的"我也是有底线的"布局
+              if (list.length >= mListTotalSize) {
+                list.add(Constants.END_LINE_TAG);
+              }
+              mListData = list;
+            }
+            mSlideData = slideData;
+          });
+        }
+      }
+    });
   }
 
   /// 渲染列表项
@@ -54,7 +126,7 @@ class NewsListPage extends StatelessWidget {
     if (index == 0) {
       return new Container(
         height: 180.0,
-        child: new SlideView(slideData),
+        child: new SlideView(mSlideData),
       );
     }
 
@@ -67,7 +139,10 @@ class NewsListPage extends StatelessWidget {
     }
 
     index = index ~/ 2; // 取整
-    var itemData = listData[index];
+    var itemData = mListData[index];
+    if(itemData == Constants.END_LINE_TAG){
+      return new CommonEndLine();
+    }
     // 代表列表item中的标题这一行
     var titleRow = new Row(
       children: <Widget>[
@@ -134,11 +209,26 @@ class NewsListPage extends StatelessWidget {
           shape: BoxShape.circle,
           color: const Color(0xFFECECEC),
           image: new DecorationImage(
-//              image: new ExactAssetImage('./images/ic_img_default.jpg'),
-              image: new NetworkImage(thumbImgUrl),
+              image: new ExactAssetImage('./images/ic_img_default.jpg'),
               fit: BoxFit.cover),
           border: new Border.all(color: const Color(0xFFECECEC), width: 2.0)),
     );
+    if (thumbImgUrl != null && thumbImgUrl.length > 0) {
+      thumbImg = new Container(
+          margin: const EdgeInsets.all(10.0),
+          width: 60.0,
+          height: 60.0,
+          decoration: new BoxDecoration(
+            shape: BoxShape.circle,
+            color: const Color(0xFFECECEC),
+            image: new DecorationImage(
+                image: new NetworkImage(thumbImgUrl), fit: BoxFit.cover),
+            border: new Border.all(
+              color: const Color(0xFFECECEC),
+              width: 2.0,
+            ),
+          ));
+    }
 
     // item的row
     var itemRow = new Row(
