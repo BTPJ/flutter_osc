@@ -1,4 +1,7 @@
+import 'dart:async';
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_osc/pages/WebViewPage.dart';
 
 /// 发现Tab界面
 // ignore: must_be_immutable
@@ -136,26 +139,54 @@ class DiscoveryPage extends StatelessWidget {
     String title = item.title;
     switch (title) {
       case "开源软件":
-        print("点击开源软件");
+        Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+          return new WebViewPage(
+              title: "开源软件", url: "https://m.gitee.com/explore");
+        }));
         break;
       case "码云推荐":
-        print("点击码云推荐");
+        Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+          return new WebViewPage(
+              title: "码云推荐", url: "https://m.gitee.com/explore");
+        }));
         break;
       case "代码片段":
-        print("点击代码片段");
+        Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+          return new WebViewPage(
+              title: "代码片段", url: "https://m.gitee.com/gists");
+        }));
         break;
       case "扫一扫":
-        print("点击扫一扫");
+        scan();
         break;
       case "摇一摇":
         print("点击摇一摇");
+        Scaffold
+            .of(context)
+            .showSnackBar(new SnackBar(content: new Text("点击摇一摇")));
         break;
       case "码云封面人物":
-        print("点击码云封面人物");
+        Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+          return new WebViewPage(
+              title: "码云封面人物", url: "https://m.gitee.com/gitee-stars/");
+        }));
         break;
       case "线下活动":
-        print("点击线下活动");
+        Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+          return new WebViewPage(
+              title: "线下活动", url: "https://m.gitee.com/gists");
+        }));
         break;
+    }
+  }
+
+  /// 扫码
+  Future scan() async {
+    try {
+      String barCode = await BarcodeScanner.scan();
+      print(barCode);
+    } on Exception catch (e) {
+      print(e);
     }
   }
 }

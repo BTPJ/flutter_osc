@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_osc/base/Constants.dart';
 import 'package:flutter_osc/http/Api.dart';
 import 'package:flutter_osc/http/NetUtil.dart';
+import 'package:flutter_osc/pages/WebViewPage.dart';
 import 'package:flutter_osc/widgets/CommonEndLine.dart';
 import 'package:flutter_osc/widgets/SlideView.dart';
 
@@ -140,7 +140,7 @@ class NewsListPageState extends State<NewsListPage> {
 
     index = index ~/ 2; // 取整
     var itemData = mListData[index];
-    if(itemData == Constants.END_LINE_TAG){
+    if (itemData == Constants.END_LINE_TAG) {
       return new CommonEndLine();
     }
     // 代表列表item中的标题这一行
@@ -262,11 +262,12 @@ class NewsListPageState extends State<NewsListPage> {
     );
 
     return new InkWell(
-      child: itemRow,
-      onTap: () {
-        //TODO item 点击事件
-        print("点击第$index项");
-      },
-    );
+        child: itemRow,
+        onTap: () {
+          //TODO item 点击事件
+          Navigator.of(context).push(new MaterialPageRoute(
+              builder: (context) =>
+                  new WebViewPage(title: "资讯详情", url: itemData['detailUrl'])));
+        });
   }
 }
