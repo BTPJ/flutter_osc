@@ -8,3 +8,6 @@
 /build
 /captures
 GeneratedPluginRegistrant.java
+/app/release/
+/gradle/wrapper/gradle-wrapper.properties
+/gradle/
